@@ -1,5 +1,5 @@
 version: 1.2
 workflows:
-  - name: DownsampleStepsOfTen
+  - name: DownsampleSam
     subclass: WDL
-    primaryDescriptorPath: /WDL/Workflows/DownsampleStepsOfTen.wdl
+    primaryDescriptorPath: /WDL/Workflows/DownsampleSam.wdl
