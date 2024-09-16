@@ -2,24 +2,25 @@ version 1.0
 
 import "../Tasks/Downsample.wdl" as Downsample
 
-workflow DownsampleStepsofTen {
+workflow DownsampleSam {
     input {
         File inputCram
         File refFasta
         File refFastaIndex
+		Float probability
         String strategy
     }
 
-    call Downsample.Downsample as Downsample_0_9{
+    call Downsample.Downsample {
         input:
             inputCram = inputCram,
             refFasta = refFasta,
             refFastaIndex = refFastaIndex,
-            probability = 0.9,
+            probability = probability,
             strategy = strategy
     }
 
     output {
-        File downsampledBam_0_9 = Downsample_0_9.downsampledBam
+        File downsampledBam = Downsample.downsampledBam
     }
 }
