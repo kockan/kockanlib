@@ -11,16 +11,15 @@ task Downsample {
 
     String docker = "us.gcr.io/broad-gotc-prod/picard-cloud:2.27.5"
     Int preemptible = 0
-    Int cpu = 16
-    Int memoryMB = 32000
-    Int javaMemorySize = memoryMB - 16000
-    Int maxHeap = memoryMB - 8000
+    Int cpu = 4
+    Int memory = 64000
+    Int javaMaxHeapSize = 32000
     Int diskSize = ceil(3.5 * size(inputCram, "GiB") + 256)
 
     String outputBasename = sub(sub(basename(inputCram), "\\.bam$", ""), "\\.cram$", "")
 
     command <<<
-        java -Xms~{javaMemorySize}m -Xmx~{maxHeap}m -jar /usr/picard/picard.jar \
+        java -Xmx~{javaMaxHeapSize}m -jar /usr/picard/picard.jar \
             DownsampleSam \
             -I ~{inputCram} \
             -O ~{outputBasename}.downsampled.bam \
@@ -33,7 +32,7 @@ task Downsample {
     runtime {
         docker: docker
         preemptible: preemptible
-        memory: "~{memoryMB} MiB"
+        memory: "~{memory} MiB"
         cpu: cpu
         disks: "local-disk " + diskSize + " HDD"
     }
