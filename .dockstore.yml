@@ -3,3 +3,6 @@ workflows:
   - name: DownsampleSam
     subclass: WDL
     primaryDescriptorPath: /WDL/Workflows/DownsampleSam.wdl
+  - name: CollectHsMetrics
+    subclass: WDL
+    primaryDescriptorPath: /WDL/Workflows/CollectHsMetrics.wdl
