@@ -27,14 +27,14 @@ task CollectHsMetricsTask {
         --METRIC_ACCUMULATION_LEVEL ALL_READS \
         --REFERENCE_SEQUENCE ~{reference} \
         --COVERAGE_CAP 100000 \
-		--PER_TARGET_COVERAGE ~{prefix}.per_target_coverage.txt \
+        --PER_TARGET_COVERAGE ~{prefix}.per_target_coverage.txt \
         --PER_BASE_COVERAGE ~{prefix}.per_base_coverage.txt \
         --VALIDATION_STRINGENCY LENIENT
     >>>
 
     output {
         File hs_metrics = "~{prefix}.hs_metrics.txt"
-		File per_target_coverage = "~{prefix}.per_target_coverage.txt"
+        File per_target_coverage = "~{prefix}.per_target_coverage.txt"
         File per_base_coverage = "~{prefix}.per_base_coverage.txt"
     }
 
@@ -60,19 +60,19 @@ workflow CollectHsMetrics {
 
     call CollectHsMetricsTask {
         input:
-			bam = bam,
-			bai = bai,
-			reference = reference,
-			reference_fai = reference_fai,
-			reference_dict = reference_dict,
-			bait_interval_list = bait_interval_list,
-			target_interval_list = target_interval_list,
-			bait_set_name = bait_set_name
+            bam = bam,
+            bai = bai,
+            reference = reference,
+            reference_fai = reference_fai,
+            reference_dict = reference_dict,
+            bait_interval_list = bait_interval_list,
+            target_interval_list = target_interval_list,
+            bait_set_name = bait_set_name
     }
 
     output {
         File hs_metrics = CollectHsMetricsTask.hs_metrics
-		File per_target_coverage = CollectHsMetricsTask.per_target_coverage
+        File per_target_coverage = CollectHsMetricsTask.per_target_coverage
         File per_base_coverage = CollectHsMetricsTask.per_base_coverage
     }
 }
