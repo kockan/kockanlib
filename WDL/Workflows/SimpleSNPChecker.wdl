@@ -64,10 +64,11 @@ task SimpleSNPCheckerTask {
                         else:
                             num_alt_bases = num_alt_bases + 1
 
-                        coverage = num_ref_bases + num_alt_bases
-                        if coverage > 100:
-                            vaf = num_alt_bases / coverage
-                            outfile.write(chromosome + ":" + str(start) + "\t" + "{:.3f}".format(vaf) + "\n")
+            coverage = num_ref_bases + num_alt_bases
+            if coverage > 100:
+                vaf = num_alt_bases / coverage
+                outfile.write(chromosome + ":" + str(start) + "\t" + "{:.3f}".format(vaf) + "\n")
+        
         outfile.close()
         CODE
     >>>
