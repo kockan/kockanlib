@@ -6,3 +6,6 @@ workflows:
   - name: CollectHsMetrics
     subclass: WDL
     primaryDescriptorPath: /WDL/Workflows/CollectHsMetrics.wdl
+  - name: SimpleSNPChecker
+    subclass: WDL
+    primaryDescriptorPath: /WDL/Workflows/SimpleSNPChecker.wdl
