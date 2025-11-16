@@ -78,7 +78,7 @@ task DragenCytosineReportToBismarkTask {
         cpu: cpu
         memory: "~{memory_gb} GiB"
         disks: "local-disk ~{disk_size_gb} SSD"
-        docker: ""
+        docker: "us-central1-docker.pkg.dev/broad-gp-hydrogen/hydrogen-dockers/kockan/methylation_misc@sha256:e33b932cd0adb0d7dacc4fa8c8134378e3e871ec2704e0574e462dacdc464d60"
     }
 }
 
@@ -131,7 +131,7 @@ task BismarkCovToBedgraph {
         cpu: cpu
         memory: "~{memory_gb} GiB"
         disks: "local-disk ~{disk_size_gb} SSD"
-        docker: ""
+        docker: "us-central1-docker.pkg.dev/broad-gp-hydrogen/hydrogen-dockers/kockan/methylation_misc@sha256:e33b932cd0adb0d7dacc4fa8c8134378e3e871ec2704e0574e462dacdc464d60"
     }
 }
 
@@ -159,7 +159,7 @@ task BedgraphToBigwig {
         cpu: cpu
         memory: "~{memory_gb} GiB"
         disks: "local-disk ~{disk_size_gb} SSD"
-        docker: ""
+        docker: "us-central1-docker.pkg.dev/broad-gp-hydrogen/hydrogen-dockers/kockan/methylation_misc@sha256:e33b932cd0adb0d7dacc4fa8c8134378e3e871ec2704e0574e462dacdc464d60"
     }
 }
 
