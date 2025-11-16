@@ -9,3 +9,6 @@ workflows:
   - name: SimpleSNPChecker
     subclass: WDL
     primaryDescriptorPath: /WDL/Workflows/SimpleSNPChecker.wdl
+  - name: DragenCytosineReportToBismark
+    subclass: WDL
+    primaryDescriptorPath: /WDL/Workflows/DragenCytosineReportToBismark.wdl
