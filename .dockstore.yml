@@ -12,3 +12,6 @@ workflows:
   - name: DragenCytosineReportToBismark
     subclass: WDL
     primaryDescriptorPath: /WDL/Workflows/DragenCytosineReportToBismark.wdl
+  - name: CollectDuplexSeqMetricsSplitHumanAndHPV
+    subclass: WDL
+    primaryDescriptorPath: /WDL/Workflows/CollectDuplexSeqMetricsSplitHumanAndHPV.wdl
