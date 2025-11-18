@@ -126,14 +126,14 @@ workflow CollectHsMetrics {
     }
 
     output {
-        File raw_hpv_hs_metrics = CollectHsMetricsTask
-        File raw_hpv_per_target_coverage = CollectHsMetricsTask
-        File raw_hg38_hs_metrics = CollectHsMetricsTask
-        File raw_hg38_per_target_coverage = CollectHsMetricsTask
+        File raw_hpv_hs_metrics = CollectHsMetricsTask.raw_hpv_hs_metrics
+        File raw_hpv_per_target_coverage = CollectHsMetricsTask.raw_hpv_per_target_coverage
+        File raw_hg38_hs_metrics = CollectHsMetricsTask.raw_hg38_hs_metrics
+        File raw_hg38_per_target_coverage = CollectHsMetricsTask.raw_hg38_per_target_coverage
 
-        File dedup_hpv_hs_metrics = CollectHsMetricsTask
-        File dedup_hpv_per_target_coverage = CollectHsMetricsTask
-        File dedup_hg38_hs_metrics = CollectHsMetricsTask
-        File dedup_hg38_per_target_coverage = CollectHsMetricsTask
+        File dedup_hpv_hs_metrics = CollectHsMetricsTask.dedup_hpv_hs_metrics
+        File dedup_hpv_per_target_coverage = CollectHsMetricsTask.dedup_hpv_per_target_coverage
+        File dedup_hg38_hs_metrics = CollectHsMetricsTask.dedup_hg38_hs_metrics
+        File dedup_hg38_per_target_coverage = CollectHsMetricsTask.dedup_hg38_per_target_coverage
     }
 }
