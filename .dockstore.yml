@@ -21,3 +21,6 @@ workflows:
   - name: GetHPV16MeanTargetCoverage
     subclass: WDL
     primaryDescriptorPath: /WDL/Workflows/GetHPV16MeanTargetCoverage.wdl
+  - name: GetGAPDHMeanTargetCoverage
+    subclass: WDL
+    primaryDescriptorPath: /WDL/Workflows/GetGAPDHMeanTargetCoverage.wdl
