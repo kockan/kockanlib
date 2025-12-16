@@ -24,3 +24,6 @@ workflows:
   - name: GetGAPDHMeanTargetCoverage
     subclass: WDL
     primaryDescriptorPath: /WDL/Workflows/GetGAPDHMeanTargetCoverage.wdl
+  - name: RastairCall
+    subclass: WDL
+    primaryDescriptorPath: /WDL/Workflows/RastairCall.wdl
