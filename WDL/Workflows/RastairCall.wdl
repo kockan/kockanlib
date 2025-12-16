@@ -26,13 +26,11 @@ task RastairCallTask {
         --min-baseq ~{min_base_quality} \
         --fasta-file ~{reference} \
         -- --cpgs-only \
-        --bed ~{output_basename}.bed \
-        --bed-format bed \
-        ~{bam}
+        ~{bam} > ~{output_basename}.tsv
     >>>
 
     output {
-        File rastair_methylation_calls = "~{output_basename}.bed"
+        File rastair_methylation_calls = "~{output_basename}.tsv"
     }
 
     runtime {
