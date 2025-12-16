@@ -24,9 +24,8 @@ task RastairCallTask {
         --nOB ~{nOB} \
         --min-mapq ~{min_mapping_quality} \
         --min-baseq ~{min_base_quality} \
-        -- --cpgs-only \
         --fasta-file ~{reference} \
-        ~{bam} > ~{output_basename}.tsv
+        ~{bam} >> ~{output_basename}.tsv
     >>>
 
     output {
