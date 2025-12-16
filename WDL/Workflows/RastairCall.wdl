@@ -25,7 +25,7 @@ task RastairCallTask {
         --min-mapq ~{min_mapping_quality} \
         --min-baseq ~{min_base_quality} \
         --fasta-file ~{reference} \
-        --cpgs-only \
+        -- --cpgs-only \
         --bed ~{output_basename}.bed \
         --bed-format bed \
         ~{bam}
