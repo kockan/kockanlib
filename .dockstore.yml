@@ -27,3 +27,6 @@ workflows:
   - name: RastairCall
     subclass: WDL
     primaryDescriptorPath: /WDL/Workflows/RastairCall.wdl
+  - name: SamtoolsNumReadsOnContig
+    subclass: WDL
+    primaryDescriptorPath: /WDL/Workflows/SamtoolsNumReadsOnContig.wdl
