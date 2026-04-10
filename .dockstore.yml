@@ -30,3 +30,6 @@ workflows:
   - name: SamtoolsNumReadsOnContig
     subclass: WDL
     primaryDescriptorPath: /WDL/Workflows/SamtoolsNumReadsOnContig.wdl
+  - name: CustomConsensusFilter
+    subclass: WDL
+    primaryDescriptorPath: /WDL/Workflows/CustomConsensusFilter.wdl
