@@ -2,10 +2,12 @@ version 1.0
 
 task CustomConsensusFilter {
     input {
+        String sample_id
         File simplex_bam
         File duplex_bam
         File simplex_bam_index
         File duplex_bam_index
+        File regions
 
         Int? cpu = 2
         Int? memory_gb = 16
@@ -16,47 +18,50 @@ task CustomConsensusFilter {
         set -e
         python3 <<CODE
 
-        import sys
         import pysam
         from collections import Counter
-
-        ctr_simplex = Counter()
-        ctr_duplex = Counter()
 
         infile_simplex = pysam.AlignmentFile("~{simplex_bam}", "rb")
         infile_duplex = pysam.AlignmentFile("~{duplex_bam}", "rb")
 
-        for read in infile_simplex.fetch("HPV16_Ref"):
-            ctr_simplex[read.get_tag("cD")] += 1
+        region_list = []
+        with open("~{regions}", 'r') as f:
+            region_list = [line.strip() for line in f]
 
-        for read in infile_duplex.fetch("HPV16_Ref"):
-            ctr_duplex[read.get_tag("cD")] += 1
+        outfile = open("~{sample_id}.consensus_read_filter.tsv", 'w')
+
+        for region in region_list:
+            ctr_simplex = Counter()
+            ctr_duplex = Counter()
+
+            for read in infile_simplex.fetch(region):
+                ctr_simplex[read.get_tag("cD")] += 1
+
+            for read in infile_duplex.fetch(region):
+                ctr_duplex[read.get_tag("cD")] += 1
+
+            if len(ctr_duplex) == 0:
+                count_filter_a = 0
+            else:
+                count_filter_a = sum(ctr_simplex.values()) - ctr_simplex[1]
+
+            if sum(ctr_simplex.values()) == ctr_simplex[1]:
+                count_filter_b = 0
+            else:
+                count_filter_b = sum(ctr_simplex.values()) - ctr_simplex[1]
+
+            outfile.write(region + "\t" + str(count_filter_a) + "\t" + str(count_filter_b) + "\n")
+
+        outfile.close()
 
         infile_simplex.close()
         infile_duplex.close()
-
-        if len(ctr_duplex) == 0:
-            count_filter_a = 0
-        else:
-            count_filter_a = sum(ctr_simplex.values()) - ctr_simplex[1]
-
-        if sum(ctr_simplex.values()) == ctr_simplex[1]:
-            count_filter_b = 0
-        else:
-            count_filter_b = sum(ctr_simplex.values()) - ctr_simplex[1]
-
-        with open("custom_consensus_filter_a.txt", 'w') as f:
-            f.write(str(count_filter_a))
-
-        with open("custom_consensus_filter_b.txt", 'w') as f:
-            f.write(str(count_filter_b))
 
         CODE
     >>>
 
     output {
-        Int custom_consensus_filter_a_count = read_int("custom_consensus_filter_a.txt")
-        Int custom_consensus_filter_b_count = read_int("custom_consensus_filter_b.txt")
+        File custom_consensus_filter = "~{sample_id}.consensus_read_filter.tsv"
     }
 
     runtime {
@@ -69,22 +74,25 @@ task CustomConsensusFilter {
 
 workflow CustomConsensusFilter {
     input {
+        String sample_id
         File simplex_bam
         File duplex_bam
         File simplex_bam_index
         File duplex_bam_index
+        File regions
     }
 
     call CustomConsensusFilter {
         input:
+            sample_id = sample_id,
             simplex_bam = simplex_bam,
             duplex_bam = duplex_bam,
             simplex_bam_index = simplex_bam_index,
-            duplex_bam_index = duplex_bam_index
+            duplex_bam_index = duplex_bam_index,
+            regions = regions
     }
 
     output {
-        Int custom_consensus_filter_a_count = CustomConsensusFilter.custom_consensus_filter_a_count
-        Int custom_consensus_filter_b_count = CustomConsensusFilter.custom_consensus_filter_b_count
+        File custom_consensus_filter = CustomConsensusFilter.custom_consensus_filter
     }
 }
