@@ -63,9 +63,8 @@ task CustomConsensusFilter {
                 count_filter_f = sum(v for k, v in ctr_simplex.items() if k >= 20)
                 count_filter_g = sum(v for k, v in ctr_simplex.items() if k >= 50)
 
-            outfile.write(region + "\t" + str(count_filter_a) + "\t" + str(count_filter_b) + str(count_filter_c) + "\t")
-            outfile.write(str(count_filter_d) + "\t" + str(count_filter_e) + "\t" + str(count_filter_f) + "\t")
-            outfile.write(str(count_filter_g) + "\n")
+            outfile.write(region + "\t" + str(count_filter_a) + "\t" + str(count_filter_b) + "\t" + str(count_filter_c) + "\t")
+            outfile.write(str(count_filter_d) + "\t" + str(count_filter_e) + "\t" + str(count_filter_f) + "\t" + str(count_filter_g) + "\n")
 
         outfile.close()
 
