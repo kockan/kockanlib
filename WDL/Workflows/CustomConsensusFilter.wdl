@@ -120,14 +120,107 @@ task CustomConsensusFilter {
     }
 }
 
+task SummarizeStats {
+    input {
+        String sample_id
+        String top_hpv_contig
+        File fs_stats
+        File gapdh_regions
+        File fp_regions
+
+        Int? cpu = 2
+        Int? memory_gb = 16
+        Int? disk_size_gb = 512
+    }
+
+    command <<<
+        set -e
+        python3 <<CODE
+
+        gapdh_region_list = []
+        with open("~{gapdh_regions}", 'r') as f:
+            gapdh_region_list = [line.strip() for line in f]
+
+        fp_region_list = []
+        with open("~{fp_regions}", 'r') as f:
+            fp_region_list = [line.strip() for line in f]
+
+        hpv_simplex_reads = 0
+        hpv_duplex_reads = 0
+        hpv_simplex_reads_fs_g_1 = 0
+        hpv_simplex_reads_fs_geq_3 = 0
+        hpv_simplex_reads_fs_geq_5 = 0
+        hpv_simplex_reads_fs_geq_10 = 0
+        gapdh_simplex_reads = 0
+        gapdh_duplex_reads = 0
+        hg38_simplex_reads = 0
+        hg38_duplex_reads = 0
+        hg38_simplex_reads_fp_only = 0
+        hg38_duplex_reads_fp_only = 0
+        mean_simplex_depth_hg38_fp_only = 0.0
+
+        with open("~{fs_stats}", 'r') as f:
+            for line in f:
+                line = line.rstrip()
+                columns = line.split('\t')
+
+                region = columns[0]
+                if region.startswith("~{top_hpv_contig}"}:
+                    hpv_simplex_reads = int(columns[1])
+                    hpv_duplex_reads = int(columns[2])
+                    hpv_simplex_reads_fs_g_1 = int(columns[3])
+                    hpv_simplex_reads_fs_geq_3 = int(columns[4])
+                    hpv_simplex_reads_fs_geq_5 = int(columns[5])
+                    hpv_simplex_reads_fs_geq_10 = int(columns[6])
+
+                if region in gapdh_region_list:
+                    gapdh_simplex_reads = gapdh_simplex_reads + int(columns[1])
+                    gapdh_duplex_reads = gapdh_duplex_reads + int(columns[2])
+
+                if region in fp_region_list:
+                    hg38_simplex_reads_fp_only = hg38_simplex_reads_fp_only + int(columns[1])
+                    hg38_duplex_reads_fp_only = hg38_duplex_reads_fp_only + int(columns[2])
+                    mean_simplex_depth_hg38_fp_only = mean_simplex_depth_hg38_fp_only + float(columns[7])
+
+                if not region.startswith("HPV"):
+                    hg38_simplex_reads = hg38_simplex_reads + int(columns[1])
+                    hg38_duplex_reads = hg38_duplex_reads + int(columns[2])
+
+        mean_simplex_depth_hg38_fp_only = mean_simplex_depth_hg38_fp_only / len(fp_region_list)
+
+        outfile = open("~{sample_id}.fs_stats_summary.tsv", 'w')
+        outfile.write("~{sample_id}" + "\t" + str(hpv_simplex_reads) + "\t" + str(hpv_duplex_reads) + "\t" + str(hpv_simplex_reads_fs_g_1) + "\t")
+        outfile.write(str(hpv_simplex_reads_fs_geq_3) + "\t" + str(hpv_simplex_reads_fs_geq_5) + "\t" + str(hpv_simplex_reads_fs_geq_10) + "\t")
+        outfile.write(str(gapdh_simplex_reads) + "\t" + str(gapdh_duplex_reads) + "\t" + str(hg38_simplex_reads) + "\t" + str(hg38_duplex_reads) + "\t")
+        outfile.write(str(hg38_simplex_reads_fp_only) + "\t" + str(hg38_duplex_reads_fp_only) + "\t" + str(mean_simplex_depth_hg38_fp_only) + "\n")
+        outfile.close()
+
+        CODE
+    >>>
+
+    output {
+        File fs_stats_summary = "~{sample_id}.fs_stats_summary.tsv"
+    }
+
+    runtime {
+        cpu: cpu
+        memory: "~{memory_gb} GiB"
+        disks: "local-disk ~{disk_size_gb} SSD"
+        docker: "us-central1-docker.pkg.dev/broad-gp-hydrogen/hydrogen-dockers/kockan/simple_pysam@sha256:a302f9efe0bf1d4f9998ee1e9dda406223454ccaea0b5619046742221c1d2a74"
+    }
+}
+
 workflow CustomConsensusFilter {
     input {
         String sample_id
+        String top_hpv_contig
         File simplex_bam
         File duplex_bam
         File simplex_bam_index
         File duplex_bam_index
         File regions
+        File gapdh_regions
+        File fp_regions
     }
 
     call CustomConsensusFilter {
@@ -140,8 +233,17 @@ workflow CustomConsensusFilter {
             regions = regions
     }
 
+    call SummarizeStats {
+        input:
+            sample_id = sample_id,
+            top_hpv_contig = top_hpv_contig,
+            fs_stats = CustomConsensusFilter.fs_metrics,
+            gapdh_regions = gapdh_regions,
+            fp_regions = fp_regions
+    }
     output {
         File custom_consensus_filter = CustomConsensusFilter.custom_consensus_filter
         File fs_metrics = CustomConsensusFilter.fs_metrics
+        File fs_stats_summary = SummarizeStats.fs_stats_summary
     }
 }
