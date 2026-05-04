@@ -165,7 +165,7 @@ task SummarizeStats {
                 columns = line.split('\t')
 
                 region = columns[0]
-                if region.startswith("~{top_hpv_contig}"}:
+                if region.startswith("~{top_hpv_contig}"):
                     hpv_simplex_reads = int(columns[1])
                     hpv_duplex_reads = int(columns[2])
                     hpv_simplex_reads_fs_g_1 = int(columns[3])
