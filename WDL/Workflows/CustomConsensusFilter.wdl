@@ -189,10 +189,18 @@ task SummarizeStats {
         mean_simplex_depth_hg38_fp_only = mean_simplex_depth_hg38_fp_only / len(fp_region_list)
 
         outfile = open("~{sample_id}.fs_stats_summary.tsv", 'w')
+
+        outfile.write("sample_id" + "\t" + "hpv_simplex_reads" + "\t" + "hpv_duplex_reads" + "\t" + "hpv_simplex_reads_fs_g_1" + "\t")
+        outfile.write("hpv_simplex_reads_fs_geq_3" + "\t" + "hpv_simplex_reads_fs_geq_5" + "\t" + "hpv_simplex_reads_fs_geq_10" + "\t")
+        outfile.write("hg38_simplex_reads" + "\t" + "hg38_duplex_reads" + "\t" + "hg38_simplex_reads_fp_only" + "\t" + "hg38_duplex_reads_fp_only" + "\t")
+        outfile.write("mean_simplex_depth_hg38_fp_only" + "\t" + "gapdh_simplex_reads" + "\t" + "gapdh_duplex_reads" + "\n")
+
         outfile.write("~{sample_id}" + "\t" + str(hpv_simplex_reads) + "\t" + str(hpv_duplex_reads) + "\t" + str(hpv_simplex_reads_fs_g_1) + "\t")
         outfile.write(str(hpv_simplex_reads_fs_geq_3) + "\t" + str(hpv_simplex_reads_fs_geq_5) + "\t" + str(hpv_simplex_reads_fs_geq_10) + "\t")
-        outfile.write(str(gapdh_simplex_reads) + "\t" + str(gapdh_duplex_reads) + "\t" + str(hg38_simplex_reads) + "\t" + str(hg38_duplex_reads) + "\t")
-        outfile.write(str(hg38_simplex_reads_fp_only) + "\t" + str(hg38_duplex_reads_fp_only) + "\t" + str(mean_simplex_depth_hg38_fp_only) + "\n")
+        outfile.write(str(hg38_simplex_reads) + "\t" + str(hg38_duplex_reads) + "\t")
+        outfile.write(str(hg38_simplex_reads_fp_only) + "\t" + str(hg38_duplex_reads_fp_only) + "\t" + str(mean_simplex_depth_hg38_fp_only) + "\t")
+        outfile.write(str(gapdh_simplex_reads) + "\t" + str(gapdh_duplex_reads) + "\n")
+
         outfile.close()
 
         CODE
