@@ -30,6 +30,7 @@ task CustomConsensusFilter {
 
         outfile = open("~{sample_id}.consensus_read_filter.tsv", 'w')
         outfile_fs_metrics = open("~{sample_id}.fs_metrics.tsv", 'w')
+        outfile_hpv_mean_depths_filtered = open("~{sample_id}.hpv_mean_depths_filtered.tsv", 'w')
 
         for region in region_list:
             tokens = region.split('\t')
@@ -91,6 +92,38 @@ task CustomConsensusFilter {
             else:
                 mean_simplex_depth = 0
 
+            if chromosome.startswith("HPV"):
+                total_depth_fs_g_1 = 0
+                total_depth_fs_geq_3 = 0
+                total_depth_fs_geq_5 = 0
+                num_positions = 0
+
+                for pileupcolumn in infile_simplex.pileup(chromosome, start, end, stepper = "all", truncate = False):
+                    count_fs_g_1 = 0
+                    count_fs_geq_3 = 0
+                    count_fs_geq_5 = 0
+                    for pileupread in pileupcolumn.pileups:
+                        if pileupread.alignment.get_tag("cD") > 1:
+                            count_fs_g_1 += 1
+                        if pileupread.alignment.get_tag("cD") >= 3:
+                            count_fs_geq_3 += 1
+                        if pileupread.alignment.get_tag("cD") >= 5:
+                            count_fs_geq_5 += 1
+
+                    total_depth_fs_g_1 += count_fs_g_1
+                    total_depth_fs_geq_3 += count_fs_geq_3
+                    total_depth_fs_geq_5 += count_fs_geq_5
+                    num_positions += 1
+
+                mean_simplex_depth_fs_g_1 = 0
+                mean_simplex_depth_fs_geq_3 = 0
+                mean_simplex_depth_fs_geq_5 = 0
+                if num_positions > 0:
+                    mean_simplex_depth_fs_g_1 = total_depth_fs_g_1 / num_positions
+                    mean_simplex_depth_fs_geq_3 = total_depth_fs_geq_3 / num_positions
+                    mean_simplex_depth_fs_geq_5 = total_depth_fs_geq_5 / num_positions
+                outfile_hpv_mean_depths_filtered.write(chromosome + "\t" + str(mean_simplex_depth_fs_g_1) + "\t" + str(mean_simplex_depth_fs_geq_3) + "\t" + str(mean_simplex_depth_fs_geq_5) + "\n")
+
             outfile.write(chromosome + ":" + str(start) + "-" + str(end) + "\t" + str(count_filter_a) + "\t" + str(count_filter_b) + "\t" + str(count_filter_c) + "\t")
             outfile.write(str(count_filter_d) + "\t" + str(count_filter_e) + "\t" + str(count_filter_f) + "\t" + str(count_filter_g) + "\n")
 
@@ -100,6 +133,7 @@ task CustomConsensusFilter {
 
         outfile.close()
         outfile_fs_metrics.close()
+        outfile_hpv_mean_depths_filtered.close()
 
         infile_simplex.close()
         infile_duplex.close()
@@ -110,6 +144,7 @@ task CustomConsensusFilter {
     output {
         File custom_consensus_filter = "~{sample_id}.consensus_read_filter.tsv"
         File fs_metrics = "~{sample_id}.fs_metrics.tsv"
+        File hpv_mean_depths_filtered = "~{sample_id}.hpv_mean_depths_filtered.tsv"
     }
 
     runtime {
@@ -127,6 +162,7 @@ task SummarizeStats {
         File fs_stats
         File gapdh_regions
         File fp_regions
+        File hpv_mean_depths_filtered
 
         Int? cpu = 2
         Int? memory_gb = 16
@@ -158,6 +194,20 @@ task SummarizeStats {
         hg38_simplex_reads_fp_only = 0
         hg38_duplex_reads_fp_only = 0
         mean_simplex_depth_hg38_fp_only = 0.0
+        mean_simplex_depth_hpv_fs_g_1 = 0.0
+        mean_simplex_depth_hpv_fs_geq_3 = 0.0
+        mean_simplex_depth_hpv_fs_geq_5 = 0.0
+
+        with open("~{hpv_mean_depths_filtered}", 'r') as f:
+            for line in f:
+                line = line.rstrip()
+                columns = line.split('\t')
+
+                region = columns[0]
+                if regions.startswith("~{top_hpv_contig}"):
+                    mean_simplex_depth_hpv_fs_g_1 = float(columns[1])
+                    mean_simplex_depth_hpv_fs_geq_3 = float(columns[2])
+                    mean_simplex_depth_hpv_fs_geq_5 = float(columns[3])
 
         with open("~{fs_stats}", 'r') as f:
             for line in f:
@@ -193,13 +243,15 @@ task SummarizeStats {
         outfile.write("sample_id" + "\t" + "hpv_simplex_reads" + "\t" + "hpv_duplex_reads" + "\t" + "hpv_simplex_reads_fs_g_1" + "\t")
         outfile.write("hpv_simplex_reads_fs_geq_3" + "\t" + "hpv_simplex_reads_fs_geq_5" + "\t" + "hpv_simplex_reads_fs_geq_10" + "\t")
         outfile.write("hg38_simplex_reads" + "\t" + "hg38_duplex_reads" + "\t" + "hg38_simplex_reads_fp_only" + "\t" + "hg38_duplex_reads_fp_only" + "\t")
-        outfile.write("mean_simplex_depth_hg38_fp_only" + "\t" + "gapdh_simplex_reads" + "\t" + "gapdh_duplex_reads" + "\n")
+        outfile.write("mean_simplex_depth_hg38_fp_only" + "\t" + "gapdh_simplex_reads" + "\t" + "gapdh_duplex_reads" + "\t")
+        outfile.write("mean_simplex_depth_hpv_fs_g_1" + "\t" + "mean_simplex_depth_hpv_fs_geq_3" + "\t" + "mean_simplex_depth_hpv_fs_geq_5" + "\n")
 
         outfile.write("~{sample_id}" + "\t" + str(hpv_simplex_reads) + "\t" + str(hpv_duplex_reads) + "\t" + str(hpv_simplex_reads_fs_g_1) + "\t")
         outfile.write(str(hpv_simplex_reads_fs_geq_3) + "\t" + str(hpv_simplex_reads_fs_geq_5) + "\t" + str(hpv_simplex_reads_fs_geq_10) + "\t")
         outfile.write(str(hg38_simplex_reads) + "\t" + str(hg38_duplex_reads) + "\t")
         outfile.write(str(hg38_simplex_reads_fp_only) + "\t" + str(hg38_duplex_reads_fp_only) + "\t" + str(mean_simplex_depth_hg38_fp_only) + "\t")
-        outfile.write(str(gapdh_simplex_reads) + "\t" + str(gapdh_duplex_reads) + "\n")
+        outfile.write(str(gapdh_simplex_reads) + "\t" + str(gapdh_duplex_reads) + "\t")
+        outfile.write(str(mean_simplex_depth_hpv_fs_g_1) + "\t" + str(mean_simplex_depth_hpv_fs_geq_3) + "\t" + str(mean_simplex_depth_hpv_fs_geq_5) + "\n")
 
         outfile.close()
 
@@ -247,7 +299,8 @@ workflow CustomConsensusFilter {
             top_hpv_contig = top_hpv_contig,
             fs_stats = CustomConsensusFilter.fs_metrics,
             gapdh_regions = gapdh_regions,
-            fp_regions = fp_regions
+            fp_regions = fp_regions,
+            hpv_mean_depths_filtered = CustomConsensusFilter.hpv_mean_depths_filtered
     }
     output {
         File custom_consensus_filter = CustomConsensusFilter.custom_consensus_filter
