@@ -204,7 +204,7 @@ task SummarizeStats {
                 columns = line.split('\t')
 
                 region = columns[0]
-                if regions.startswith("~{top_hpv_contig}"):
+                if region.startswith("~{top_hpv_contig}"):
                     mean_simplex_depth_hpv_fs_g_1 = float(columns[1])
                     mean_simplex_depth_hpv_fs_geq_3 = float(columns[2])
                     mean_simplex_depth_hpv_fs_geq_5 = float(columns[3])
