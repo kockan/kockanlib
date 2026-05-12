@@ -98,7 +98,7 @@ task CustomConsensusFilter {
                 total_depth_fs_geq_5 = 0
                 num_positions = 0
 
-                for pileupcolumn in infile_simplex.pileup(chromosome, start, end, stepper = "all", truncate = False, max_depth = 1000000):
+                for pileupcolumn in infile_simplex.pileup(chromosome, start, end, stepper = "all", truncate = False, max_depth = 1000000, min_base_quality = 0, min_mapping_quality = 0, ignore_overlaps = False):
                     count_fs_g_1 = 0
                     count_fs_geq_3 = 0
                     count_fs_geq_5 = 0
