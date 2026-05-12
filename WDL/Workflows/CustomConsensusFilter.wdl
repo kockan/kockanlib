@@ -96,12 +96,15 @@ task CustomConsensusFilter {
                 total_depth_fs_g_1 = 0
                 total_depth_fs_geq_3 = 0
                 total_depth_fs_geq_5 = 0
+                total_depth_fs_geq_10 = 0
                 num_positions = 0
 
-                for pileupcolumn in infile_simplex.pileup(chromosome, start, end, stepper = "all", truncate = False, max_depth = 1000000, min_base_quality = 0, min_mapping_quality = 0, ignore_overlaps = False):
+                for pileupcolumn in infile_simplex.pileup(chromosome, start, end, stepper = "all", truncate = False, max_depth = 1000000, ignore_overlaps = True):
                     count_fs_g_1 = 0
                     count_fs_geq_3 = 0
                     count_fs_geq_5 = 0
+                    count_fs_geq_10 = 0
+
                     for pileupread in pileupcolumn.pileups:
                         if pileupread.alignment.get_tag("cD") > 1:
                             count_fs_g_1 += 1
@@ -109,20 +112,25 @@ task CustomConsensusFilter {
                             count_fs_geq_3 += 1
                         if pileupread.alignment.get_tag("cD") >= 5:
                             count_fs_geq_5 += 1
+                        if pileupread.alignment.get_tag("cD") >= 10:
+                            count_fs_geq_10 += 1
 
                     total_depth_fs_g_1 += count_fs_g_1
                     total_depth_fs_geq_3 += count_fs_geq_3
                     total_depth_fs_geq_5 += count_fs_geq_5
+                    total_depth_fs_geq_10 += count_fs_geq_10
                     num_positions += 1
 
                 mean_simplex_depth_fs_g_1 = 0
                 mean_simplex_depth_fs_geq_3 = 0
                 mean_simplex_depth_fs_geq_5 = 0
+                mean_simplex_depth_fs_geq_10 = 0
                 if num_positions > 0:
                     mean_simplex_depth_fs_g_1 = total_depth_fs_g_1 / num_positions
                     mean_simplex_depth_fs_geq_3 = total_depth_fs_geq_3 / num_positions
                     mean_simplex_depth_fs_geq_5 = total_depth_fs_geq_5 / num_positions
-                outfile_hpv_mean_depths_filtered.write(chromosome + "\t" + str(mean_simplex_depth_fs_g_1) + "\t" + str(mean_simplex_depth_fs_geq_3) + "\t" + str(mean_simplex_depth_fs_geq_5) + "\n")
+                    mean_simplex_depth_fs_geq_10 = total_depth_fs_geq_10 / num_positions
+                outfile_hpv_mean_depths_filtered.write(chromosome + "\t" + str(mean_simplex_depth_fs_g_1) + "\t" + str(mean_simplex_depth_fs_geq_3) + "\t" + str(mean_simplex_depth_fs_geq_5) + "\t" + str(mean_simplex_depth_fs_geq_10) + "\n")
 
             outfile.write(chromosome + ":" + str(start) + "-" + str(end) + "\t" + str(count_filter_a) + "\t" + str(count_filter_b) + "\t" + str(count_filter_c) + "\t")
             outfile.write(str(count_filter_d) + "\t" + str(count_filter_e) + "\t" + str(count_filter_f) + "\t" + str(count_filter_g) + "\n")
@@ -197,6 +205,7 @@ task SummarizeStats {
         mean_simplex_depth_hpv_fs_g_1 = 0.0
         mean_simplex_depth_hpv_fs_geq_3 = 0.0
         mean_simplex_depth_hpv_fs_geq_5 = 0.0
+        mean_simplex_depth_hpv_fs_geq_10 = 0.0
 
         with open("~{hpv_mean_depths_filtered}", 'r') as f:
             for line in f:
@@ -208,6 +217,7 @@ task SummarizeStats {
                     mean_simplex_depth_hpv_fs_g_1 = float(columns[1])
                     mean_simplex_depth_hpv_fs_geq_3 = float(columns[2])
                     mean_simplex_depth_hpv_fs_geq_5 = float(columns[3])
+                    mean_simplex_depth_hpv_fs_geq_10 = float(columns[4])
 
         with open("~{fs_stats}", 'r') as f:
             for line in f:
@@ -244,14 +254,14 @@ task SummarizeStats {
         outfile.write("hpv_simplex_reads_fs_geq_3" + "\t" + "hpv_simplex_reads_fs_geq_5" + "\t" + "hpv_simplex_reads_fs_geq_10" + "\t")
         outfile.write("hg38_simplex_reads" + "\t" + "hg38_duplex_reads" + "\t" + "hg38_simplex_reads_fp_only" + "\t" + "hg38_duplex_reads_fp_only" + "\t")
         outfile.write("mean_simplex_depth_hg38_fp_only" + "\t" + "gapdh_simplex_reads" + "\t" + "gapdh_duplex_reads" + "\t")
-        outfile.write("mean_simplex_depth_hpv_fs_g_1" + "\t" + "mean_simplex_depth_hpv_fs_geq_3" + "\t" + "mean_simplex_depth_hpv_fs_geq_5" + "\n")
+        outfile.write("mean_simplex_depth_hpv_fs_g_1" + "\t" + "mean_simplex_depth_hpv_fs_geq_3" + "\t" + "mean_simplex_depth_hpv_fs_geq_5" + "\t" + "mean_simplex_depth_hpv_fs_geq_10" + "\n")
 
         outfile.write("~{sample_id}" + "\t" + str(hpv_simplex_reads) + "\t" + str(hpv_duplex_reads) + "\t" + str(hpv_simplex_reads_fs_g_1) + "\t")
         outfile.write(str(hpv_simplex_reads_fs_geq_3) + "\t" + str(hpv_simplex_reads_fs_geq_5) + "\t" + str(hpv_simplex_reads_fs_geq_10) + "\t")
         outfile.write(str(hg38_simplex_reads) + "\t" + str(hg38_duplex_reads) + "\t")
         outfile.write(str(hg38_simplex_reads_fp_only) + "\t" + str(hg38_duplex_reads_fp_only) + "\t" + str(mean_simplex_depth_hg38_fp_only) + "\t")
         outfile.write(str(gapdh_simplex_reads) + "\t" + str(gapdh_duplex_reads) + "\t")
-        outfile.write(str(mean_simplex_depth_hpv_fs_g_1) + "\t" + str(mean_simplex_depth_hpv_fs_geq_3) + "\t" + str(mean_simplex_depth_hpv_fs_geq_5) + "\n")
+        outfile.write(str(mean_simplex_depth_hpv_fs_g_1) + "\t" + str(mean_simplex_depth_hpv_fs_geq_3) + "\t" + str(mean_simplex_depth_hpv_fs_geq_5) + "\t" + str(mean_simplex_depth_hpv_fs_geq_10) + "\n")
 
         outfile.close()
 
@@ -270,6 +280,39 @@ task SummarizeStats {
     }
 }
 
+task GetCoverageStatsFiltered {
+    input {
+        String sample_id
+        String top_hpv_contig
+        File simplex_bam
+        File simplex_bam_index
+
+        Int? cpu = 2
+        Int? memory_gb = 16
+        Int? disk_size_gb = 512
+    }
+
+    command <<<
+        samtools view -h -e '[cD] > 1' ~{simplex_bam} ~{top_hpv_contig} | samtools coverage - > ~{sample_id}.fs_g_1.coverage.txt
+        samtools view -h -e '[cD] >= 3' ~{simplex_bam} ~{top_hpv_contig} | samtools coverage - > ~{sample_id}.fs_geq_3.coverage.txt
+        samtools view -h -e '[cD] >= 5' ~{simplex_bam} ~{top_hpv_contig} | samtools coverage - > ~{sample_id}.fs_geq_5.coverage.txt
+        samtools view -h -e '[cD] >= 10' ~{simplex_bam} ~{top_hpv_contig} | samtools coverage - > ~{sample_id}.fs_geq_10.coverage.txt
+    >>>
+
+    output {
+        File fs_g_1_coverage = "~{sample_id}.fs_g_1.coverage.txt"
+        File fs_geq_3_coverage = "~{sample_id}.fs_geq_3.coverage.txt"
+        File fs_geq_5_coverage = "~{sample_id}.fs_geq_5.coverage.txt"
+        File fs_geq_10_coverage = "~{sample_id}.fs_geq_10.coverage.txt"
+    }
+
+    runtime {
+        cpu: cpu
+        memory: "~{memory_gb} GiB"
+        disks: "local-disk ~{disk_size_gb} SSD"
+        docker: "us-central1-docker.pkg.dev/broad-gp-hydrogen/hydrogen-dockers/kockan/samtools@sha256:d92861a76f16d9f4ee2d89ee52af46d7beb27764675682a410b3cd847f3d5a17"
+    }
+}
 workflow CustomConsensusFilter {
     input {
         String sample_id
@@ -302,9 +345,22 @@ workflow CustomConsensusFilter {
             fp_regions = fp_regions,
             hpv_mean_depths_filtered = CustomConsensusFilter.hpv_mean_depths_filtered
     }
+
+    call GetCoverageStatsFiltered {
+        input:
+            sample_id = sample_id,
+            top_hpv_contig = top_hpv_contig,
+            simplex_bam = simplex_bam,
+            simplex_bam_index = simplex_bam_index
+    }
+
     output {
         File custom_consensus_filter = CustomConsensusFilter.custom_consensus_filter
         File fs_metrics = CustomConsensusFilter.fs_metrics
         File fs_stats_summary = SummarizeStats.fs_stats_summary
+        File fs_g_1_coverage = GetCoverageStatsFiltered.fs_g_1_coverage
+        File fs_geq_3_coverage = GetCoverageStatsFiltered.fs_geq_3_coverage
+        File fs_geq_5_coverage = GetCoverageStatsFiltered.fs_geq_5_coverage
+        File fs_geq_10_coverage = GetCoverageStatsFiltered.fs_geq_10_coverage
     }
 }
